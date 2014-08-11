@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:			Crowdfunding by Astoundify
- * Plugin URI:			https://github.com/Studio164a/crowdfunding/
+ * Plugin URI:			https://github.com/Studio164a/appthemer-crowdfunding/
  * Description:			A crowdfunding platform in the likes of Kickstarter and Indigogo
  * Author:				Astoundify
  * Author URI:			http://astoundify.com
@@ -12,7 +12,7 @@
  */
 
 // Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) exit; 
 
 /** Check if Easy Digital Downloads is active */
 include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
