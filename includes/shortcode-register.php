@@ -83,6 +83,8 @@ add_action( 'atcf_shortcode_register', 'atcf_shortcode_register_form' );
  * @return void
  */
 function atcf_registration_handle() {
+	global $edd_options;
+	
 	if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) )
 		return;
 
