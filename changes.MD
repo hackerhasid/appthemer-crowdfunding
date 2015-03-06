@@ -1,3 +1,9 @@
+#### 1.8.4: March 6, 2015
+
+* Fix: Backer count is correctly updated when multiple pledges to the same campaign are made in the same order.
+* Improvement: Permit multi-cart checkouts.
+* Removing code that is not used by Franklin (if you're using a different theme, you may experience issues)
+
 #### 1.8.3: August 9, 2014
 
 * Improvement: Improves performance by retrieving campaign's total pledged amount in a single query.
