@@ -127,8 +127,9 @@ final class ATCF_CrowdFunding {
 		require_once( $this->includes_dir . 'shortcode-submit.php' );
 		require_once( $this->includes_dir . 'shortcode-profile.php' );
 		require_once( $this->includes_dir . 'shortcode-login.php' );
-		require_once( $this->includes_dir . 'shortcode-register.php' );
-
+		require_once( $this->includes_dir . 'shortcode-register.php' );		
+		require_once( $this->includes_dir . 'deprecated.php' );
+		
 		do_action( 'atcf_include_files' );
 
 		if ( ! is_admin() )
