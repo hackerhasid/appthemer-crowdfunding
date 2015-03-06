@@ -755,8 +755,8 @@ function atcf_shortcode_submit( $atts = array() ) {
 
 		<p class="atcf-submit-campaign-submit">
 			<button type="submit" name="submit" value="submit" class="button">
-				<?php echo $is_editing
-				? sprintf( _x( 'Update %s', 'edit "campaign"', 'atcf' ), edd_get_label_singular() )
+				<?php echo $is_editing 
+				? sprintf( _x( 'Update %s', 'edit "campaign"', 'atcf' ), edd_get_label_singular() ) 
 				: sprintf( _x( 'Submit %s', 'submit "campaign"', 'atcf' ), edd_get_label_singular() ); ?>
 			</button>
 

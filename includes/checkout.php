@@ -20,44 +20,70 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function atcf_log_pledge_limit( $payment_id, $new_status, $old_status ) {
 	global $edd_logs;
 
-	// Make sure that payments are only completed once
-	if ( $old_status != 'pending' )
+	// If we're in test mode, don't proceed unless expected.
+	if ( edd_is_test_mode() && ! apply_filters( 'edd_log_test_payment_stats', false ) ) {
 		return;
+	}
 
-	// Make sure the payment completion is only processed when new status is complete
-	if ( in_array( $new_status, array( 'refunded', 'failed', 'revoked', 'cancelled',  'abandoned' ) ) )
-		return;
+	// When shifting from pending status to something other than 
+	// those two, we should reduce the backer count.
+	if ( 'pending' == $old_status ) {
 
-	if ( edd_is_test_mode() && ! apply_filters( 'edd_log_test_payment_stats', false ) )
-		return;
+		// Make sure the backer count is only incremented when the payment
+		// is completed or pre-approved.
+		if ( in_array( $new_status, array( 'publish', 'preapproval' ) ) ) {
 
-	atcf_update_backer_count( $payment_id, 'increase' );
+			atcf_update_backer_count( $payment_id, 'increase' );
+
+		}
+	}
+	// When shifting from a publish/preapproved status to something other than 
+	// those two, we should reduce the backer count.
+	else if ( in_array( $old_status, array( 'publish', 'preapproval' ) ) ) {
+
+		if ( ! in_array( $new_status,  array( 'publish', 'preapproval' ) ) ) {
+
+			atcf_update_backer_count( $payment_id, 'decrease' );
+
+		}
+	}
 }
 add_action( 'edd_update_payment_status', 'atcf_log_pledge_limit', 100, 3 );
 
+/**
+ * Increment the backer count for every download in this payment. 
+ *
+ * @param 	int 		$payment_id
+ * @param 	string 		$direction
+ * @return 	void
+ * @since 	0.9
+ */
 function atcf_update_backer_count( $payment_id, $direction ) {
 	$payment_data = edd_get_payment_meta( $payment_id );
 	$downloads    = maybe_unserialize( $payment_data[ 'downloads' ] );
 
-	if ( ! is_array( $downloads ) )
+	if ( ! is_array( $downloads ) ) {
 		return;
+	}
 
 	foreach ( $downloads as $download ) {
+
 		$variable_pricing = edd_get_variable_prices( $download[ 'id' ] );
-
+	
 		foreach ( $variable_pricing as $key => $value ) {
-			$what = $download[ 'options' ][ 'price_id' ];
+			$what = isset( $download[ 'options' ][ 'price_id' ] ) ? $download[ 'options' ][ 'price_id' ] : 0;
 
-			if ( ! isset ( $variable_pricing[ $what ][ 'bought' ] ) )
+			if ( ! isset ( $variable_pricing[ $what ][ 'bought' ] ) ) {
 				$variable_pricing[ $what ][ 'bought' ] = 0;
+			}
 
 			$current = $variable_pricing[ $what ][ 'bought' ];
 
-			if ( $key == $what ) {
+			if ( $key === $what ) {
 				if ( 'increase' == $direction ) {
-					$variable_pricing[ $what ][ 'bought' ] = $current + 1;
+					$variable_pricing[ $what ][ 'bought' ] = $current + $download[ 'quantity' ];
 				} else {
-					$variable_pricing[ $what ][ 'bought' ] = $current - 1;
+					$variable_pricing[ $what ][ 'bought' ] = $current - $download[ 'quantity' ];
 				}
 			}
 		}
@@ -170,4 +196,7 @@ function atcf_clear_cart() {
 
 	edd_empty_cart();
 }
-add_action( 'atcf_found_single', 'atcf_clear_cart' );
+
+if ( apply_filters( 'atcf_prevent_multi_pledge_cart', false ) ) {
+	add_action( 'atcf_found_single', 'atcf_clear_cart' );
+}

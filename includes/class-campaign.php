@@ -364,38 +364,23 @@ class ATCF_Campaign {
 	public function current_amount( $formatted = true ) {
 
 		// Don't do this more than once
-		if ( !isset( $this->current_amount ) ) {
-
-			global $wpdb;
+		if ( ! isset( $this->current_amount ) ) {
 
 			// Allow plugins/themes to filter which IDs are matched in post_parent.
 			$campaign_ids = apply_filters( 'atcf_campaign_pledged_amount_id', array( $this->ID ), $this );
-			$campaign_ids = array_filter( $campaign_ids, 'is_int' );
-			$campaign_ids = implode( ',', $campaign_ids );
 
-			// Fetches the SUM of all payments made to this campaign.
-			$query = apply_filters( 'atcf_campaign_pledged_query', 
-				"SELECT SUM(m.meta_value) 
-				FROM ( 
-					SELECT DISTINCT m1.post_id, m1.meta_value 
-					FROM $wpdb->postmeta m1 
-					INNER JOIN $wpdb->posts p1
-					ON p1.ID = m1.post_id
-					INNER JOIN $wpdb->postmeta m2 
-					ON m2.meta_value = m1.post_id 
-					INNER JOIN $wpdb->posts p2 
-					ON p2.ID = m2.post_id
-					WHERE p1.post_status IN ('publish', 'preapproval')
-					AND p2.post_parent IN ( $campaign_ids )
-					AND m1.meta_key = '_edd_payment_total' 
-				) m", 
-			$campaign_ids, $this );
+			$this->current_amount = 0; 
 
-			$this->current_amount = $wpdb->get_var( $query );
+			foreach( $campaign_ids as $campaign_id ) {
+
+				$this->current_amount += get_post_meta( $campaign_id, '_edd_download_earnings', true );
+
+			}
 		}
 	
-		if ( $formatted )
+		if ( $formatted ) {
 			return edd_currency_filter( edd_format_amount( $this->current_amount ) );
+		}
 
 		return $this->current_amount;
 	}
